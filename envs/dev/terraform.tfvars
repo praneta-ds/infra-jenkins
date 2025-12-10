@@ -1,0 +1,5 @@
+location="Canada Central"
+resource_group_name = "rg-jenkins-tf"
+prefix="jenkins"
+app_service_plan_sku_name="F1"
+ostype="Windows"
