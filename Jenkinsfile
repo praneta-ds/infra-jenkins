@@ -7,14 +7,11 @@ pipeline {
     }
 
     environment {
-        // credentials id names in Jenkins (create these)
-        // the output of `az ad sp create-for-rbac --sdk-auth` stored as secret text
         ARM_CLIENT_ID       = credentials('clientid')
         ARM_CLIENT_SECRET   = credentials('azure-client-secret')
         ARM_TENANT_ID       = credentials('azure-tenant-id')
         ARM_SUBSCRIPTION_ID = credentials('azure-subscription-id')
-        GIT_CREDENTIALS = credentials('git-token')     // optional: Git token if repo private
-        TF_WORKSPACE = "${params.ENV}"
+        TF_WORKSPACE        = "${params.ENV}"
     }
 
     stages {
@@ -24,34 +21,29 @@ pipeline {
             }
         }
 
-        stage('Prepare Agent') {
+        stage('Check Tools') {
             steps {
-                sh 'terraform --version || true'
-                sh 'az --version || true'
+                sh 'terraform --version'
+                sh 'az --version'
             }
         }
 
-        stage('Set Azure Auth') {
-            steps {
-                script {
-                    // Write SDK auth to file; provider picks it up via ARM_AUTH_LOCATION or ARM_SDK_AUTH
-                    sh '''
-            echo "$AZURE_SDK_AUTH" > ./azure_credentials.json
-            export ARM_AUTH_LOCATION=./azure_credentials.json
-          '''
-                }
-            }
-        }
-
-        stage('Init') {
+        stage('Terraform Init') {
             steps {
                 dir("envs/${params.ENV}") {
-                    sh 'terraform init -input=false'
+                    withEnv([
+                        "ARM_CLIENT_ID=${env.ARM_CLIENT_ID}",
+                        "ARM_CLIENT_SECRET=${env.ARM_CLIENT_SECRET}",
+                        "ARM_SUBSCRIPTION_ID=${env.ARM_SUBSCRIPTION_ID}",
+                        "ARM_TENANT_ID=${env.ARM_TENANT_ID}"
+                    ]) {
+                        sh 'terraform init -input=false'
+                    }
                 }
             }
         }
 
-        stage('Validate') {
+        stage('Terraform Validate') {
             steps {
                 dir("envs/${params.ENV}") {
                     sh 'terraform validate'
@@ -59,12 +51,19 @@ pipeline {
             }
         }
 
-        stage('Plan') {
+        stage('Terraform Plan') {
             steps {
                 dir("envs/${params.ENV}") {
-                    sh 'terraform plan -out=tfplan -input=false'
-                    sh 'terraform show -json tfplan > tfplan.json || true'
-                    archiveArtifacts artifacts: "envs/${params.ENV}/tfplan.json", allowEmptyArchive: true
+                    withEnv([
+                        "ARM_CLIENT_ID=${env.ARM_CLIENT_ID}",
+                        "ARM_CLIENT_SECRET=${env.ARM_CLIENT_SECRET}",
+                        "ARM_SUBSCRIPTION_ID=${env.ARM_SUBSCRIPTION_ID}",
+                        "ARM_TENANT_ID=${env.ARM_TENANT_ID}"
+                    ]) {
+                        sh 'terraform plan -out=tfplan -input=false'
+                        sh 'terraform show -json tfplan > tfplan.json'
+                        archiveArtifacts artifacts: 'tfplan.json', allowEmptyArchive: true
+                    }
                 }
             }
         }
@@ -76,11 +75,18 @@ pipeline {
             }
         }
 
-        stage('Apply') {
+        stage('Terraform Apply') {
             when { expression { params.APPLY == true } }
             steps {
                 dir("envs/${params.ENV}") {
-                    sh 'terraform apply -input=false -auto-approve tfplan'
+                    withEnv([
+                        "ARM_CLIENT_ID=${env.ARM_CLIENT_ID}",
+                        "ARM_CLIENT_SECRET=${env.ARM_CLIENT_SECRET}",
+                        "ARM_SUBSCRIPTION_ID=${env.ARM_SUBSCRIPTION_ID}",
+                        "ARM_TENANT_ID=${env.ARM_TENANT_ID}"
+                    ]) {
+                        sh 'terraform apply -input=false -auto-approve tfplan'
+                    }
                 }
             }
         }
@@ -90,11 +96,11 @@ pipeline {
         always {
             cleanWs()
         }
-    success {
-      echo "Pipeline succeeded"
-    }
-    failure {
-      echo "Pipeline failed"
-    }
+        success {
+            echo "Pipeline succeeded"
+        }
+        failure {
+            echo "Pipeline failed"
+        }
     }
 }
