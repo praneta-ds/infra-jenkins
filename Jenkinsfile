@@ -121,6 +121,7 @@ pipeline {
             script {
                 emailext(
                     to: 'pranetadashora@gmail.com',
+                    from: 'pranetadashora@gmail.com',
                     subject: "Jenkins Build Successful: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                     body: """The Jenkins build was successful.
                     Check console output: ${env.BUILD_URL}"""
