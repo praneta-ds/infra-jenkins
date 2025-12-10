@@ -117,16 +117,17 @@ pipeline {
             cleanWs()
         }
 
-        success {
+    success {
+        script {
             emailext(
-                node {
-
-                    to: 'pranetadashora@gmail.com',
-                    subject: "Jenkins Build Successful: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                    body: "The Jenkins build was successful.\n\nCheck console output at: ${env.BUILD_URL}"
-                }
+                to: 'pranetadashora@gmail.com',
+                subject: "Jenkins Build Successful: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: """The Jenkins build was successful.
+                Check console output: ${env.BUILD_URL}"""
             )
         }
+    }
+
 
         failure {
             emailext(
