@@ -4,6 +4,7 @@ pipeline {
     parameters {
         choice name: 'ENV', choices: ['dev', 'prod'], description: 'Target environment'
         booleanParam name: 'APPLY', defaultValue: false, description: 'If true will run apply after plan'
+        booleanParam name: 'DESTROY', defaultValue: false, description: 'Destroy environment'
     }
 
     environment {
@@ -87,6 +88,16 @@ pipeline {
                     ]) {
                         sh 'terraform apply -input=false -auto-approve tfplan'
                     }
+                }
+            }
+        }
+        stage('Terraform Destroy') {
+            when { expression { params.DESTROY } }
+            steps {
+                dir("envs/${params.ENV}") {
+                    // Manual confirmation before destroying resources
+                    input message: "⚠️ Are you sure you want to DESTROY all resources in ${params.ENV}?"
+                    sh 'terraform destroy -auto-approve'
                 }
             }
         }
