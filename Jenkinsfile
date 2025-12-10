@@ -132,6 +132,7 @@ pipeline {
         failure {
             emailext(
                 to: 'pranetadashora@gmail.com',
+                from: 'pranetadashora@gmail.com',
                 subject: "Jenkins Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                 body: "The Jenkins build failed.\n\nCheck console output at: ${env.BUILD_URL}"
       
