@@ -7,7 +7,7 @@ pipeline {
     }
 
     environment {
-        ARM_CLIENT_ID       = credentials('clientid')
+        ARM_CLIENT_ID       = credentials('clientId')
         ARM_CLIENT_SECRET   = credentials('azure-client-secret')
         ARM_TENANT_ID       = credentials('azure-tenant-id')
         ARM_SUBSCRIPTION_ID = credentials('azure-subscription-id')
