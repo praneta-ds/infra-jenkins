@@ -122,6 +122,8 @@ pipeline {
                 to: 'pranetadashora@gmail.com',
                 subject: "Jenkins Build Successful: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                 body: "The Jenkins build was successful.\n\nCheck console output at: ${env.BUILD_URL}"
+                mimeType: 'text/html',
+                attachmentsPattern: output
             )
         }
 
@@ -130,6 +132,8 @@ pipeline {
                 to: 'pranetadashora@gmail.com',
                 subject: "Jenkins Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                 body: "The Jenkins build failed.\n\nCheck console output at: ${env.BUILD_URL}"
+                mimeType: 'text/html',
+                attachmentsPattern: output
             )
         }
     }
