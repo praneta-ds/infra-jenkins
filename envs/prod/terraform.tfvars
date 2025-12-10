@@ -1,5 +1,5 @@
 location="Canada Central"
 resource_group_name = "rg-jenkins-tf-prod"
-prefix="jenkins"
+prefix="jenkins-prod"
 app_service_plan_sku_name="F1"
 ostype="Windows"
