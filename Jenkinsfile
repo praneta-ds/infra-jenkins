@@ -37,7 +37,7 @@ pipeline {
                         "ARM_SUBSCRIPTION_ID=${env.ARM_SUBSCRIPTION_ID}",
                         "ARM_TENANT_ID=${env.ARM_TENANT_ID}"
                     ]) {
-                        sh 'terraform init -input=false'
+                        sh 'terraform init'
                     }
                 }
             }
