@@ -91,6 +91,12 @@ pipeline {
                 }
             }
         }
+        stage('Terraform Output') {
+            steps {
+                sh 'terraform output -json > output.json'
+                archiveArtifacts artifacts: 'output.json', fingerprint: true
+            }
+        }
         stage('Terraform Destroy') {
             when { expression { params.DESTROY } }
             steps {
@@ -107,11 +113,22 @@ pipeline {
         always {
             cleanWs()
         }
+
         success {
-            echo "Pipeline succeeded"
+            emailext(
+                echo "Pipeline succeeded"
+                to: 'pranetadashora@gmail.com',
+                subject: "Jenkins Build Successful: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: "The Jenkins build was successful.\n\nCheck console output at: ${env.BUILD_URL}"
+            )
         }
         failure {
-            echo "Pipeline failed"
+            emailext(
+                echo "Pipeline failed"
+                to: 'pranetadashora@gmail.com'',
+                subject: "Jenkins Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: "The Jenkins build failed.\n\nCheck console output at: ${env.BUILD_URL}"
+            )
         }
     }
 }
