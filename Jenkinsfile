@@ -122,7 +122,6 @@ pipeline {
                 to: 'pranetadashora@gmail.com',
                 subject: "Jenkins Build Successful: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                 body: "The Jenkins build was successful.\n\nCheck console output at: ${env.BUILD_URL}"
-                attachmentsPattern: "envs/${params.ENV}/output.json"
             )
         }
 
